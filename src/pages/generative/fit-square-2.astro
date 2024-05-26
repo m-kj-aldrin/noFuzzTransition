@@ -14,11 +14,11 @@ interface GridCell {
   height: number;
 }
 
-let [gridW, gridH] = [21, 7];
+let [gridW, gridH] = [21, 9];
 let size = gridW * gridH;
 
-let widths = [1, 2, 7];
-let heights = [1, 5];
+let widths = [1, 2, 3, 5];
+let heights = [1, 2, 5];
 
 function ratioOfConstantDiff(size: number, constant: number) {
   return (size - constant) / size;
@@ -54,7 +54,7 @@ function markArea(buffer: GridCell[], cell: GridCell, width: number, height: num
       if (sampleCell.marked) {
         width = x;
 
-        if (chance(0.25)) {
+        if (chance(0.5)) {
           height = y + 1;
           stop = true;
         }
@@ -95,7 +95,7 @@ for (let i = 0; i < vert_buffer.length; i++) {
   let mark_width = pick(widths);
   let mark_height = pick(heights);
 
-  if (chance(0.5)) {
+  if (chance(0.9)) {
     mark_height = mark_width;
   }
 
@@ -154,8 +154,9 @@ let centerTranslate: [number, number] = [
           let strokeOpacity = 0.45;
           if (isSquare && chance(0.5)) {
             fill = "url(#pattern-dots)";
-            strokeOpacity = 0.25;
+            strokeOpacity = 0.15;
             fillOpacity = 0.65;
+            color = "cadetblue";
           }
 
           return (
@@ -165,7 +166,7 @@ let centerTranslate: [number, number] = [
                 translate={offsetTranslate}
                 {width}
                 {height}
-                rx={pick([0.5, 1])}
+                rx={pick([0.25, 0.5])}
                 stroke="currentColor"
                 stroke-opacity={strokeOpacity}
                 {fill}
