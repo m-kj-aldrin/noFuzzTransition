@@ -1,0 +1,36 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"pattern"> {
+  id: string;
+}
+
+const { id, ...attrs } = Astro.props;
+---
+
+<svg width="0" height="0">
+  <defs>
+    <pattern
+      id={`pattern-${id}`}
+      width="16"
+      height="16"
+      patternUnits="userSpaceOnUse"
+      patternTransform="scale(0.25) translate(0.5 0.5)"
+    >
+      <g fill="cadetblue">
+        <g transform="translate(4 4)">
+          <circle cx="0" cy="0" r="2"></circle>
+        </g>
+        <g transform="translate(12 12)">
+          <circle cx="0" cy="0" r="2"></circle>
+        </g>
+      </g>
+    </pattern>
+  </defs>
+</svg>
+
+<style>
+  svg {
+    position: fixed;
+  }
+</style>

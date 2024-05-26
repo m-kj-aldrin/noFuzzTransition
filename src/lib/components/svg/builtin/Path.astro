@@ -1,0 +1,44 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import type { Transform } from "./transformString";
+import transformString from "./transformString";
+import type { NamedCssColor } from "../types";
+import type { vec2 } from "@lib/util/vector";
+
+type CommandType = "m" | "h" | "v" | "l" | "z" | "M" | "L";
+type ValueType = number | [number, number] | vec2;
+export type Command = [CommandType, ValueType] | CommandType;
+export type CommandList = Command[];
+
+interface Props
+    extends Transform,
+        Omit<HTMLAttributes<"path">, "rotate" | "scale"> {
+    d?: CommandList;
+    fill?: NamedCssColor | "currentColor" | "none";
+    stroke?: NamedCssColor | "currentColor" | "none";
+    color?: NamedCssColor;
+}
+
+const {
+    d: _d,
+    scale,
+    rotate,
+    translate,
+    stroke = "currentColor",
+    ...attrs
+} = Astro.props;
+
+let transform = "";
+
+if (!attrs["transform"]) {
+    transform = transformString({ scale, rotate, translate });
+}
+let d = "";
+if (_d) {
+    d = _d.slice(1).reduce((prev, curr) => {
+        return `${prev} ${curr[0]}${curr[1]}`;
+    }, `${_d[0][0]}${_d[0][1]}`);
+}
+---
+
+<path {d} {stroke} {...attrs} {transform}></path>

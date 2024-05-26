@@ -1,0 +1,96 @@
+---
+import Circle from "@lib/components/svg/builtin/Circle.astro";
+import G from "@lib/components/svg/builtin/G.astro";
+import Rect from "@lib/components/svg/builtin/Rect.astro";
+import BaseLayout from "@lib/layouts/BaseLayout.astro";
+import { irand, pick, rand } from "@lib/util/stokhos";
+import { type NamedCssColor } from "@lib/components/svg/types";
+import { range } from "@lib/util/iter";
+import { isEven } from "@lib/util/map";
+import Path, {
+    type CommandList,
+} from "@lib/components/svg/builtin/Path.astro";
+import { mult, rotate, vector } from "@lib/util/vector";
+
+let rects = [...Array(12)].map((_, i) => {
+    return {
+        i,
+        petals: range(irand(1, 5)),
+    };
+});
+
+const randColor = () =>
+    pick<NamedCssColor[]>(["orangered", "yellowgreen", "cornflowerblue"]);
+
+let rotVector = vector(1, 0);
+
+const randomVectors: CommandList = range(128).map((_, i) => {
+    let a = irand(0, 2) * (1 / 2) - 1 / 4;
+
+    rotVector = rotate(rotVector, a);
+
+    let v = mult(rotVector, irand(1, 4) * 8);
+    return ["l", v];
+});
+---
+
+<BaseLayout title="home" fullScreen={true}>
+    <svg viewBox="-256 -256 512 512">
+        <G fill="none">
+            <!-- <Path
+                stroke="cornflowerblue"
+                d={[["m", [0, 0]], ...randomVectors]}
+            /> -->
+            {
+                rects.map(({ i, petals }) => {
+                    let rotate = i * (360 / rects.length);
+
+                    return (
+                        <G color={randColor()}>
+                            <G {rotate}>
+                                <Path
+                                    d={[
+                                        ["m", [16, 0]],
+                                        ["h", [128, 0]],
+                                    ]}
+                                    stroke-width={"0.5"}
+                                />
+
+                                <Circle r={1} cx={128 + 24} />
+
+                                {petals.map((_, j) => {
+                                    let rotOffset = isEven(petals.length)
+                                        ? 0.5
+                                        : 1;
+                                    let rotate =
+                                        (j + rotOffset) * (360 / petals.length);
+
+                                    return (
+                                        <G translate={[128 + 24]}>
+                                            <G {rotate}>
+                                                <Path
+                                                    stroke-width="0.5"
+                                                    d={[
+                                                        ["m", [8, 0]],
+                                                        ["h", [24, 0]],
+                                                    ]}
+                                                />
+                                            </G>
+                                        </G>
+                                    );
+                                })}
+                            </G>
+                        </G>
+                    );
+                })
+            }
+        </G>
+    </svg>
+</BaseLayout>
+
+<style>
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+</style>

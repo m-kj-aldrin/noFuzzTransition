@@ -1,0 +1,29 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import transformString, { type Transform } from "./transformString";
+import type { NamedCssColor } from "../types";
+
+interface Props
+    extends Transform,
+        Omit<HTMLAttributes<"circle">, "rotate" | "scale"> {
+    fill?: NamedCssColor | "currentColor" | "none";
+    stroke?: NamedCssColor | "currentColor" | "none";
+    color?: NamedCssColor;
+}
+
+const {
+    scale,
+    rotate,
+    translate,
+    fill = "currentColor",
+    ...attrs
+} = Astro.props;
+
+let transform = "";
+
+if (!attrs["transform"]) {
+    transform = transformString({ scale, rotate, translate });
+}
+---
+
+<circle {...attrs} {fill} {transform}></circle>

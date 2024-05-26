@@ -1,0 +1,289 @@
+---
+import Circle from "@lib/components/svg/builtin/Circle.astro";
+import G from "@lib/components/svg/builtin/G.astro";
+import type { Command, CommandList } from "@lib/components/svg/builtin/Path.astro";
+import Path from "@lib/components/svg/builtin/Path.astro";
+import Rect from "@lib/components/svg/builtin/Rect.astro";
+import Dots from "@lib/components/svg/shapes/patterns/dots.astro";
+import type { NamedCssColor } from "@lib/components/svg/types";
+import BaseLayout from "@lib/layouts/BaseLayout.astro";
+import { IF } from "@lib/util/comperator";
+import { range } from "@lib/util/iter";
+import { chance, pick, rand } from "@lib/util/stokhos";
+import { add, mult, sub, type vec2 } from "@lib/util/vector";
+
+interface GridCell {
+  index: [number, number];
+  color: NamedCssColor;
+  marked: boolean;
+  width: number | null;
+  height: number | null;
+}
+
+let gridW = 7;
+let gridH = 24;
+
+let sizes = [1, 2, 3]; // Array of possible sizes
+
+let widths = [1, 5, 7];
+let heights = [1, 2, 16];
+
+let vert_buffer = range<GridCell>(gridW * gridH, (i, arr) => {
+  let column = i % gridW;
+  let row = Math.floor(i / gridW);
+
+  return {
+    index: [column, row],
+    color: "black",
+    marked: false,
+    width: null,
+    height: null,
+  };
+});
+
+function canPlaceRectangle(
+  buffer: GridCell[],
+  startX: number,
+  startY: number,
+  width: number,
+  height: number,
+  gridW: number,
+  gridH: number
+): boolean {
+  if (startX + width > gridW || startY + height > gridH) return false;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let cell = buffer[(startY + y) * gridW + (startX + x)];
+      if (cell.marked) return false;
+    }
+  }
+  return true;
+}
+
+function markRectangle(
+  buffer: GridCell[],
+  startX: number,
+  startY: number,
+  width: number,
+  height: number,
+  color: NamedCssColor,
+  gridW: number
+) {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let cell = buffer[(startY + y) * gridW + (startX + x)];
+      cell.marked = true;
+      cell.color = color;
+      if (x === 0 && y === 0) {
+        cell.width = width;
+        cell.height = height;
+      } else {
+        cell.width = null;
+        cell.height = null;
+      }
+    }
+  }
+}
+
+// function matchPlacement(
+//   buffer: GridCell[],
+//   cell: GridCell,
+//   width: number,
+//   height: number,
+//   gridW: number,
+//   gridH: number
+// ) {
+//   let [sx, sy] = cell.index;
+//   let newWidth = 1;
+//   let newHeight = 1;
+
+//   for (let x = 0; x < width; x++) {
+//     for (let y = 0; y < height; y++) {
+//       let xIoffset = Math.min(sx + x, gridW - 1);
+//       let yIoffset = Math.min(sy + y, gridH - 1) * gridW;
+//       let compareCell = buffer[xIoffset + yIoffset];
+//       console.log(xIoffset + yIoffset);
+
+//       if (compareCell.marked) continue;
+//       newWidth = Math.max(x, newWidth);
+//       newHeight = Math.max(y, newHeight);
+//       console.log(`newW: ${newWidth} - newH: ${newHeight}`);
+//     }
+//   }
+
+//   return {
+//     width: newWidth,
+//     height: newHeight,
+//   };
+// }
+
+for (let i = 0; i < vert_buffer.length; i++) {
+  let cell = vert_buffer[i];
+  if (cell.marked) continue;
+
+  let [startX, startY] = cell.index;
+  // let size = pick(sizes);
+  // let width = size;
+  // let height = size;
+  // if (chance(0.125)) {
+  //   height = pick(heights);
+  // }
+  // if (chance(0.125)) {
+  //   width = pick(widths);
+  //   height = 1;
+  // }
+  let width = pick(widths);
+  let height = pick(heights);
+
+  if (chance(0.5)) {
+    height = width;
+  }
+
+  // let m = Math.max(width,height)
+
+  // Reduce width and height separately until the rectangle fits
+  while (!canPlaceRectangle(vert_buffer, startX, startY, width, height, gridW, gridH)) {
+    if (width > 1) width--;
+    else if (height > 1) height--;
+    else break;
+  }
+
+  // ({ width, height } = matchPlacement(vert_buffer, cell, width, height, gridW, gridH));
+
+  if (canPlaceRectangle(vert_buffer, startX, startY, width, height, gridW, gridH)) {
+    let color = pick<NamedCssColor[]>(["cadetblue", "yellowgreen", "darkslateblue"]);
+    markRectangle(vert_buffer, startX, startY, width, height, color, gridW);
+  }
+}
+
+let frameSize = 512;
+let frameWidth = frameSize;
+let frameHeight = frameSize;
+
+let cellWidth = frameWidth / gridW;
+let cellHeight = frameHeight / gridH;
+
+let m = Math.min(cellWidth, cellHeight);
+
+cellWidth = m;
+cellHeight = m;
+
+let aspect = gridW / gridH;
+// let centerTransform: vec2 = [
+//     (-frameWidth / 2) * (aspect > 1 ? aspect : 1),
+//     (-frameHeight / 2) * (aspect < 1 ? aspect : 1),
+// ];
+let gridGap = 2.5;
+let centerTransform: vec2 = [
+  (-cellWidth * gridW) / 2 + gridGap,
+  (-cellHeight * gridH) / 2 + gridGap,
+];
+---
+
+<BaseLayout title="fit-square" fullScreen={true}>
+  <Dots id={"dots"} />
+  <svg viewBox="-256 -256 512 512">
+    <G translate={centerTransform} scale={[(512 - gridGap) / 512, (512 - gridGap) / 512]}>
+      {
+        vert_buffer.map(({ index, color, width: w, height: h, marked }) => {
+          if (!(w && h)) return;
+
+          let x = index[0] * cellWidth;
+          let y = index[1] * cellHeight;
+          let [width, height] = [w * cellWidth, h * cellHeight];
+          const scale = [(width - gridGap) / width, (height - gridGap) / height] as [
+            number,
+            number,
+          ];
+
+          let isSquare = width == height;
+
+          let translate = add([x, y], [rand(-0.25, 0.25), rand(-0.25, 0.25)]);
+          let rotate = rand(-0.125, 0.125);
+
+          let fill = color;
+          let fillOpacity = 0.25;
+          if (!isSquare) {
+            if (chance(0.25)) {
+              fillOpacity = 1;
+              fill = "url(#pattern-dots)";
+              color = "cadetblue";
+            }
+          }
+
+          return (
+            <G {translate} {rotate} {color}>
+              <G scale={scale}>
+                {IF(isSquare, () => {
+                  let innerWidth = (width * 5) / 6;
+                  let innerHeight = (height * 5) / 6;
+
+                  let cx = rand(-innerWidth / 2 + 4, innerWidth / 2 - 4);
+                  let cy = rand(-innerHeight / 2 + 4, innerHeight / 2 - 4);
+
+                  let lines: { pos: vec2 }[] = [
+                    { pos: [0, 0] },
+                    { pos: [1, 0] },
+                    { pos: [1, 1] },
+                    { pos: [0, 1] },
+                  ];
+
+                  return (
+                    <G translate={[width / 2, height / 2]}>
+                      {lines.map(({ pos }) => {
+                        let start: Command = ["m", sub(mult(pos, width), [width / 2, height / 2])];
+                        let d: CommandList = [start, ["L", [cx, cy]]];
+
+                        return <Path {d} stroke-opacity={0.25} />;
+                      })}
+
+                      <Circle {cx} {cy} r={1} fill-opacity={0.25} />
+                    </G>
+                  );
+                })}
+
+                <Rect
+                  {width}
+                  {height}
+                  stroke="currentColor"
+                  stroke-width={0.5}
+                  stroke-opacity={0.25}
+                  fill="none"
+                  rx={0.5}
+                />
+                <Rect
+                  {width}
+                  {height}
+                  stroke="currentColor"
+                  stroke-width={0.5}
+                  stroke-opacity={0.25}
+                  stroke-dasharray={"2,1"}
+                  fill-opacity={fillOpacity}
+                  rx={0.5}
+                  {fill}
+                />
+              </G>
+            </G>
+          );
+        })
+      }
+    </G>
+    <!-- <Rect
+      width={512}
+      height={512}
+      translate={[-256, -256]}
+      fill="none"
+      stroke="currentColor"
+      stroke-dasharray={"4,1"}
+      stroke-opacity={0.25}
+    /> -->
+  </svg>
+</BaseLayout>
+
+<style>
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+</style>

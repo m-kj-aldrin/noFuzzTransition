@@ -1,0 +1,49 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import transformString, { type Transform } from "./transformString";
+import type { NamedCssColor } from "../types";
+
+interface Props extends Transform, Omit<HTMLAttributes<"rect">, "rotate" | "scale"> {
+  center?: boolean | [boolean] | [boolean, boolean] | [undefined, boolean];
+  x?: number;
+  y?: number;
+  fill?: NamedCssColor | "currentColor" | "none";
+  stroke?: NamedCssColor | "currentColor" | "none";
+  color?: NamedCssColor;
+}
+let {
+  scale,
+  rotate,
+  translate,
+  width,
+  height,
+  center,
+  fill = "currentColor",
+  x = 0,
+  y = 0,
+  ...attrs
+} = Astro.props;
+
+let transform = "";
+if (!attrs["transform"]) {
+  transform = transformString({ scale, rotate, translate });
+}
+
+if (Array.isArray(center)) {
+  if (width && center?.[0]) {
+    x = +x - +width / 2;
+  }
+  if (height && center?.[1]) {
+    y = +y - +height / 2;
+  }
+} else if (center) {
+  if (width) {
+    x = +x - +width / 2;
+  }
+  if (height) {
+    y = +y - +height / 2;
+  }
+}
+---
+
+<rect {width} {height} {x} {y} {fill} {...attrs} {transform}></rect>
