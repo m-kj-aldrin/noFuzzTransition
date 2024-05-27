@@ -6,12 +6,17 @@ import type { NamedCssColor } from "@lib/components/svg/types";
 import BaseLayout from "@lib/layouts/BaseLayout.astro";
 import { range } from "@lib/util/iter";
 import { chance, pick, rand } from "@lib/util/stokhos";
+import { fade } from "astro:transitions";
 
 interface GridCell {
   index: { i: number; x: number; y: number };
   marked: boolean;
   width: number;
   height: number;
+  requestedWidth: number;
+  requestedHeight: number;
+  xclip: boolean;
+  yclip: boolean;
 }
 
 let [gridW, gridH] = [16, 24];
@@ -47,6 +52,11 @@ function markArea(
   height: number,
 ) {
   let stop = false;
+  // cell.requestedWidth = width;
+  // cell.requestedHeight = height;
+
+  // let xclip = false
+  // let yclip = false
 
   for (let y = 0; y < height; y++) {
     if (stop) {
@@ -71,6 +81,11 @@ function markArea(
     }
   }
 
+  if (width + cell.index.x == gridW) {
+    cell.xclip = true;
+  } else if (cell.index.x == 0) {
+    cell.xclip = true;
+  }
   cell.marked = true;
   cell.width = width;
   cell.height = height;
@@ -85,6 +100,10 @@ let vert_buffer = range<GridCell>(size, (i) => {
     marked: false,
     width: 0,
     height: 0,
+    requestedWidth: 0,
+    requestedHeight: 0,
+    xclip: false,
+    yclip: false,
   };
 });
 
@@ -103,6 +122,15 @@ for (let i = 0; i < vert_buffer.length; i++) {
   if (chance(0.9)) {
     mark_height = mark_width;
   }
+
+  cell.requestedWidth = mark_width;
+  cell.requestedHeight = mark_height;
+
+  // let xclip = gridW - x < mark_width;
+  // let yclip = gridH - y < mark_height;
+
+  // cell.xclip = xclip;
+  // cell.yclip = yclip;
 
   mark_width = Math.min(gridW - x, mark_width);
   mark_height = Math.min(gridH - y, mark_height);
@@ -152,9 +180,19 @@ let centerTranslate: [number, number] = [
       <G translate={centerTranslate}>
         {
           marked_buffer.map(
-            ({ width, height, index: { x, y, i }, color, isSquare }) => {
-              y = (gridH - y)
-              y -= height
+            ({
+              width,
+              height,
+              index: { x, y, i },
+              color,
+              isSquare,
+              requestedWidth,
+              requestedHeight,
+              xclip,
+              yclip,
+            }) => {
+              y = gridH - y;
+              y -= height;
               let translate: [number, number] = [x * cellWidth, y * cellHeight];
               [width, height] = [width * cellWidth, height * cellHeight];
               let scale: [number, number] = [
@@ -174,6 +212,17 @@ let centerTranslate: [number, number] = [
               }
               return (
                 <G {translate} {scale} {color}>
+                  {xclip && (
+                    <Rect
+                      width={requestedWidth * cellWidth}
+                      x={x == 0 ? -(requestedWidth * cellWidth - width) : null}
+                      height={height}
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-dasharray={"4,1"}
+                      stroke-opacity={strokeOpacity}
+                    />
+                  )}
                   <Rect
                     rotate={offsetRot}
                     translate={offsetTranslate}
