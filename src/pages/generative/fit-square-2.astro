@@ -198,10 +198,12 @@ let centerTranslate: [number, number] = [
               y = gridH - y;
               y -= height;
               let translate: [number, number] = [x * cellWidth, y * cellHeight];
+              let strokeOpacity = 0.45;
 
               let lines = false;
               if (isSquare && width > 2 && chance(0.75)) {
                 lines = true;
+                strokeOpacity = 0.05
               }
 
               [width, height] = [width * cellWidth, height * cellHeight];
@@ -213,7 +215,6 @@ let centerTranslate: [number, number] = [
               let offsetTranslate = [rand(-0.25, 0.25), rand(-0.25, 0.25)];
               let fillOpacity = 0.35;
               let fill = lines ? "none" : "currentColor";
-              let strokeOpacity = 0.45;
 
               if (isSquare && !lines && chance(0.5)) {
                 fill = "url(#pattern-dots)";
