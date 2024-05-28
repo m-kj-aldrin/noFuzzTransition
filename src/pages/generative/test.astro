@@ -1,0 +1,36 @@
+---
+import Circle from "@lib/components/svg/builtin/Circle.astro";
+import G from "@lib/components/svg/builtin/G.astro";
+import Path from "@lib/components/svg/builtin/Path.astro";
+import Rect from "@lib/components/svg/builtin/Rect.astro";
+import Dots from "@lib/components/svg/shapes/patterns/dots.astro";
+import type { NamedCssColor } from "@lib/components/svg/types";
+import BaseLayout from "@lib/layouts/BaseLayout.astro";
+import { IF } from "@lib/util/comperator";
+import { range } from "@lib/util/iter";
+import { chance, pick, rand } from "@lib/util/stokhos";
+import { fade } from "astro:transitions";
+import PatternMask from "../../lib/components/svg/shapes/patterns/PatternMask.astro";
+---
+
+<BaseLayout title="test" fullScreen={true}>
+    <PatternMask width={16} height={16} scale={[0.25, 0.25]} name="dots">
+        <circle r={3} cx="8" cy="8" fill="white"></circle>
+    </PatternMask>
+    <svg viewBox="-256 -256 512 512">
+        <Rect
+            width={32}
+            height={128}
+            center={true}
+            fill="red"
+            mask="url(#mask-dots)"
+        />
+    </svg>
+</BaseLayout>
+
+<style>
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+</style>
