@@ -181,7 +181,7 @@ let centerTranslate: [number, number] = [
 <BaseLayout title="fit-rect-2" fullScreen={true}>
   <PatternMask width={16} height={8} scale={[1, 1]} rotate={-45} name="lines">
     <Path
-      stroke-width={2}
+      stroke-width={1}
       d={[
         ["m", [0, 1]],
         ["h", 16],
@@ -215,10 +215,12 @@ let centerTranslate: [number, number] = [
               let translate: [number, number] = [x * cellWidth, y * cellHeight];
               let strokeOpacity = 0.15;
 
+              let fillOpacity = 0.25;
               let lines = false;
               if (isSquare && width > 2 && chance(0.75)) {
                 lines = true;
                 strokeOpacity = 0.05;
+                fillOpacity = 1
               }
 
               [width, height] = [width * cellWidth, height * cellHeight];
@@ -228,7 +230,6 @@ let centerTranslate: [number, number] = [
               ];
               let offsetRot = rand(-0.125, 0.125);
               let offsetTranslate = [rand(-0.25, 0.25), rand(-0.25, 0.25)];
-              let fillOpacity = 0.25;
               let fill = lines ? "none" : "currentColor";
 
               let mask = null;
@@ -240,7 +241,7 @@ let centerTranslate: [number, number] = [
                 fill = "none";
                 strokeOpacity = 0.35;
               } else if (chance(0.125)) {
-                fillOpacity = 0.5;
+                fillOpacity = 0.55;
               } else if (chance(0.5)) {
                 mask = "url(#mask-dots)";
               }
