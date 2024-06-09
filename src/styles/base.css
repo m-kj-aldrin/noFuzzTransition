@@ -31,9 +31,6 @@ main {
 main {
   max-width: 1280px;
   align-self: center;
-
-  /* border-radius: 2px;
-  padding: 8px; */
 }
 
 main {
@@ -53,4 +50,11 @@ main {
 img,
 vide {
   border-radius: 2px;
+}
+
+a:hover {
+  color: hsl(var(--color-offset));
+}
+svg a:hover {
+  fill: hsl(var(--color-offset));
 }

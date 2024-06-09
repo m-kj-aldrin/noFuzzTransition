@@ -27,7 +27,13 @@ let transform: string | undefined = "";
 if (!attrs["transform"]) {
   transform = transformString({ scale, rotate, translate });
 }
+
+if (!(_d?.[0].c == "m" || _d?.[0].c == "M")) {
+  _d?.splice(0, 0, { c: "M" });
+}
+
 let d = "";
+
 if (_d) {
   d = _d.reduce((prev, curr) => {
     let commandString = "";
@@ -65,12 +71,12 @@ if (_d) {
       }
       case "c": {
         let { dx1, dy1, dx2, dy2, dx, dy } = curr.p;
-        commandString = `${dx1} ${dy1}, ${dx2} ${dy2}, ${dx} ${dy}`;
+        commandString = `c${dx1},${dy1} ${dx2},${dy2} ${dx},${dy}`;
         break;
       }
       case "C": {
         let { x1, y1, x2, y2, x, y } = curr.p;
-        commandString = `${x1} ${y1}, ${x2} ${y2}, ${x} ${y}`;
+        commandString = `C${x1},${y1} ${x2},${y2} ${x},${y}`;
         break;
       }
       case "a": {
@@ -93,7 +99,7 @@ if (_d) {
       }
     }
     if (prev) {
-      return `${prev},${commandString}`;
+      return `${prev} ${commandString}`;
     }
     return commandString;
   }, "");
