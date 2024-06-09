@@ -5,8 +5,9 @@ import BaseLayout from "@lib/layouts/BaseLayout.astro";
 import { irand, pick } from "@lib/util/stokhos";
 import { type NamedCssColor } from "@lib/components/svg/types";
 import { range } from "@lib/util/iter";
-import { isEven } from "@lib/util/map";
+import { isEven, remap } from "@lib/util/map";
 import Path from "@lib/components/svg/builtin/Path.astro";
+import Splash from "@lib/components/Splash.astro";
 
 let rects = [...Array(12)].map((_, i) => {
   return {
@@ -19,50 +20,7 @@ const randColor = () => pick<NamedCssColor[]>(["orangered", "yellowgreen", "corn
 ---
 
 <BaseLayout title="home" fullScreen={true}>
-  <svg viewBox="-256 -256 512 512">
-    <G fill="none">
-      {
-        rects.map(({ i, petals }) => {
-          let rotate = i * (360 / rects.length);
-
-          return (
-            <G color={randColor()}>
-              <G {rotate}>
-                <Path
-                  d={[
-                    ["m", [16, 0]],
-                    ["h", [128, 0]],
-                  ]}
-                  stroke-width={"0.5"}
-                />
-
-                <Circle r={1} cx={128 + 24} />
-
-                {petals.map((_, j) => {
-                  let rotOffset = isEven(petals.length) ? 0.5 : 1;
-                  let rotate = (j + rotOffset) * (360 / petals.length);
-
-                  return (
-                    <G translate={[128 + 24]}>
-                      <G {rotate}>
-                        <Path
-                          stroke-width="0.5"
-                          d={[
-                            ["m", [8, 0]],
-                            ["h", [24, 0]],
-                          ]}
-                        />
-                      </G>
-                    </G>
-                  );
-                })}
-              </G>
-            </G>
-          );
-        })
-      }
-    </G>
-  </svg>
+  <Splash />
 </BaseLayout>
 
 <style>

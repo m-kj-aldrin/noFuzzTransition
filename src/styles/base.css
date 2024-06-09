@@ -27,13 +27,13 @@ main {
   width: 100%;
 }
 
-body > header,
+#site-header,
 main {
   max-width: 1280px;
   align-self: center;
 
-  border-radius: 4px;
-  padding: 8px;
+  /* border-radius: 2px;
+  padding: 8px; */
 }
 
 main {
@@ -52,5 +52,5 @@ main {
 
 img,
 vide {
-  border-radius: 4px;
+  border-radius: 2px;
 }

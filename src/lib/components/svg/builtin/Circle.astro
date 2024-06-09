@@ -1,12 +1,12 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 import transformString, { type Transform } from "./transformString";
-import type { NamedCssColor } from "../types";
+import type { CssColors } from "../types";
 
 interface Props extends Transform, Omit<HTMLAttributes<"circle">, "rotate" | "scale"> {
-  fill?: NamedCssColor | "currentColor" | "none";
-  stroke?: NamedCssColor | "currentColor" | "none";
-  color?: NamedCssColor;
+  fill?: CssColors;
+  stroke?: CssColors;
+  color?: CssColors;
 }
 
 const { scale, rotate, translate, fill = "currentColor", ...attrs } = Astro.props;

@@ -3,10 +3,16 @@ import { Picture } from "astro:assets";
 
 interface Props {
   images: { default: ImageMetadata }[];
-  component: any;
+  component: {
+    factory: (_props: Record<string, any>) => any;
+    slot?: string;
+  };
 }
 
-const { images, component: Component } = Astro.props as Props;
+const {
+  images,
+  component: { factory: Component, slot: componentSlot },
+} = Astro.props as Props;
 let widths = (imgSize: number) => [240, 540, 720, imgSize];
 let sizes = (imgSize: number) =>
   `(max-width:360px) 240px, (max-width:720px) 540px, (max-width:960px) 720px, ${imgSize}px`;
@@ -21,7 +27,13 @@ let dev = import.meta.env.DEV;
         if (Component) {
           return (
             <Component>
-              <img slot="picture" src={img.src} width={img.width} height={img.height} alt="" />
+              <img
+                slot={componentSlot}
+                src={img.src}
+                width={img.width}
+                height={img.height}
+                alt=""
+              />
             </Component>
           );
         }
@@ -31,7 +43,7 @@ let dev = import.meta.env.DEV;
           return (
             <Component>
               <Picture
-                slot='picture'
+                slot={componentSlot}
                 formats={["avif", "webp"]}
                 src={img}
                 widths={widths(img.width)}

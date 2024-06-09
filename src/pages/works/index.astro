@@ -9,7 +9,7 @@ const images = await Astro.glob<{ default: ImageMetadata }>("@assets/draft/img/*
 
 <BaseLayout title="works">
   <Grid>
-    <OmptimizedPortfolioImages {images} component={Card} />
+    <OmptimizedPortfolioImages {images} component={{ factory: Card, slot: "picture" }} />
   </Grid>
 </BaseLayout>
 
