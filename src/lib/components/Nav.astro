@@ -3,12 +3,12 @@ import Icon, { type IconTypes } from "./Icon.astro";
 
 const url = Astro.url;
 
-type TopPaths = "/" | "/works/" | "/generative/";
+type TopPaths = "/" | "/work/" | "/generative/";
 
 const paths: { path: TopPaths; name: IconTypes }[] = [
   { path: "/", name: "home" },
-  { path: "/works/", name: "works" },
-  { path: "/generative/", name: "gen" },
+  { path: "/work/", name: "work" },
+  { path: "/generative/", name: "generative" },
 ];
 
 const re = /\/works\/.+/;
@@ -20,19 +20,19 @@ const gen = /\/gen\/.+/.test(url.pathname);
   <div class="links">
     {
       paths.map(({ name, path }) => {
-        const worksSubDir = work && path == "/works/";
+        const worksSubDir = work && path == "/work/";
         const genSubDir = gen && path == "/generative/";
 
-        const iconType: IconTypes = path == "/" ? "home" : worksSubDir || genSubDir ? "back" : name;
+        // const iconType: IconTypes = path == "/" ? "home" : worksSubDir || genSubDir ? "back" : name;
 
         return (
           <a
             href={path}
             aria-current={url.pathname == path ? "page" : null}
-            aria-label={((worksSubDir || genSubDir) && "back to works page") || `link to ${name}`}
+            icon-variant={worksSubDir || genSubDir}
             title={name}
           >
-            <Icon name={iconType} />
+            <Icon transition:persist={false} {name} />
           </a>
         );
       })
@@ -41,6 +41,8 @@ const gen = /\/gen\/.+/.test(url.pathname);
 </nav>
 
 <script>
+  import { manifest } from "astro:ssr-manifest";
+
   const mainHeader = document.getElementById("site-header");
 
   let keyframes: Keyframe[] = [
@@ -91,6 +93,23 @@ const gen = /\/gen\/.+/.test(url.pathname);
         currentAnchor.ariaCurrent = "page";
       }
     });
+    document.addEventListener("astro:page-load", (e) => {
+      const pathname = location.pathname;
+      const test = /(\/work\/|\/generative\/).+/;
+      if (test.test(pathname)) {
+        let parentDir = "";
+        if (pathname.includes("generative")) {
+          parentDir = "generative";
+        } else if (pathname.includes("work")) {
+          parentDir = "work";
+        }
+        let el = mainHeader.querySelector(`a[title='${parentDir}']`);
+        el?.toggleAttribute("icon-variant", true);
+      } else {
+        let el = mainHeader.querySelector(`a[icon-variant]`);
+        el?.removeAttribute("icon-variant");
+      }
+    });
   }
 </script>
 
@@ -126,8 +145,7 @@ const gen = /\/gen\/.+/.test(url.pathname);
     flex-shrink: 0;
   }
 
-  [aria-current="page"],
-  [aria-label="back to works page"] {
+  [aria-current="page"] {
     color: hsl(var(--color-offset));
   }
 </style>

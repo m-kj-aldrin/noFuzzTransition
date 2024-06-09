@@ -43,7 +43,7 @@ const outerCircleRadi = 320;
             <circle r="4" fill="hsl(var(--color-primary))" stroke="none"></circle>
             <G translate={[128 - 4, 0]} color="hsl(var(--color-primary))" stroke-width={1}>
               <Circle r={1} />
-              <Circle cx={8} r={1} />
+              <Circle cx={7.5} r={1} />
               <path d={`M0,0 h${outerCircleRadi - 40 - 64 - 3}`}></path>
               <g transform={`translate(${outerCircleRadi - 60 - 64} 0)`}>
                 <Circle r="4" stroke="currentColor" fill="none" />
@@ -262,26 +262,43 @@ const outerCircleRadi = 320;
   </g>
 </svg>
 
-<script is:inline>
-  function setCurrentTime() {
-    const svg = document.querySelector("main svg");
+<script>
+  let aniId = 0;
+  let svg = document.querySelector("main svg") as SVGSVGElement;
+  function updateTime() {
+    cancelAnimationFrame(aniId);
 
-    let prevTime = +localStorage.getItem("svgTime");
-
+    // svg = document.querySelector("main svg") as SVGSVGElement;
+    if (!svg) return;
+    let prevTime = +(localStorage.getItem("svgTime") ?? 0);
     svg.setCurrentTime(prevTime);
 
-    const ani = (t) => {
+    const ani = (t: number) => {
       let svgTime = svg.getCurrentTime();
       if (svgTime) {
         localStorage.setItem("svgTime", `${svgTime}`);
       }
 
-      requestAnimationFrame(ani);
+      aniId = requestAnimationFrame(ani);
     };
-    requestAnimationFrame(ani);
+    aniId = requestAnimationFrame(ani);
   }
-  // setCurrentTime();
-  document.addEventListener("astro:page-load", setCurrentTime);
+
+  function setCurrentTime() {
+    let _svg = document.querySelector("main svg") as SVGSVGElement;
+    if (!_svg) return;
+    svg = _svg;
+
+    let prevTime = +(localStorage.getItem("svgTime") ?? 0);
+
+    svg.setCurrentTime(prevTime);
+  }
+
+  updateTime();
+
+  document.addEventListener("astro:page-load", (e) => {
+    setCurrentTime();
+  });
 </script>
 
 <style>
@@ -290,9 +307,6 @@ const outerCircleRadi = 320;
     display: block;
     margin-inline: auto;
     overflow: visible;
-  }
-
-  svg .logo {
   }
 
   svg g.illustration {

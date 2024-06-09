@@ -1,22 +1,6 @@
 ---
-import Circle from "@lib/components/svg/builtin/Circle.astro";
-import G from "@lib/components/svg/builtin/G.astro";
 import BaseLayout from "@lib/layouts/BaseLayout.astro";
-import { irand, pick } from "@lib/util/stokhos";
-import { type NamedCssColor } from "@lib/components/svg/types";
-import { range } from "@lib/util/iter";
-import { isEven, remap } from "@lib/util/map";
-import Path from "@lib/components/svg/builtin/Path.astro";
 import Splash from "@lib/components/Splash.astro";
-
-let rects = [...Array(12)].map((_, i) => {
-  return {
-    i,
-    petals: range(irand(1, 5)),
-  };
-});
-
-const randColor = () => pick<NamedCssColor[]>(["orangered", "yellowgreen", "cornflowerblue"]);
 ---
 
 <BaseLayout title="home" fullScreen={true}>

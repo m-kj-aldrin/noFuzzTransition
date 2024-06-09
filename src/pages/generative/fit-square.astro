@@ -10,6 +10,8 @@ import { IF } from "@lib/util/comperator";
 import { range } from "@lib/util/iter";
 import { chance, pick, rand } from "@lib/util/stokhos";
 
+export const prerender = false;
+
 interface GridCell {
   index: { i: number; x: number; y: number };
   marked: boolean;

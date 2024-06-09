@@ -3,16 +3,14 @@ import { Picture } from "astro:assets";
 
 interface Props {
   images: { default: ImageMetadata }[];
-  component: {
+  component?: {
     factory: (_props: Record<string, any>) => any;
     slot?: string;
   };
 }
 
-const {
-  images,
-  component: { factory: Component, slot: componentSlot },
-} = Astro.props as Props;
+const { images, component: { factory: Component, slot: componentSlot } = {} } =
+  Astro.props as Props;
 let widths = (imgSize: number) => [240, 540, 720, imgSize];
 let sizes = (imgSize: number) =>
   `(max-width:360px) 240px, (max-width:720px) 540px, (max-width:960px) 720px, ${imgSize}px`;
