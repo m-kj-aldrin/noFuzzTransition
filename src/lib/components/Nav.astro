@@ -1,155 +1,133 @@
 ---
-import Logo from "./Logo.astro";
+import Icon, { type IconTypes } from "./Icon.astro";
 
-interface Route {
-    name: string;
-    path: string;
-}
+const url = Astro.url;
 
-const pathName = Astro.url.pathname;
+type TopPaths = "/" | "/works/" | "/generative/";
 
-const routes: Route[] = [
-    { name: "home", path: "/" },
-    { name: "works", path: "/works/" },
+const paths: { path: TopPaths; name: IconTypes }[] = [
+  { path: "/", name: "home" },
+  { path: "/works/", name: "works" },
+  { path: "/generative/", name: "gen" },
 ];
+
+const re = /\/works\/.+/;
+const work = re.test(url.pathname);
+const gen = /\/gen\/.+/.test(url.pathname);
 ---
 
-<header
-    transition:persist="main-nav-parent"
-    transition:animate="none"
-    id="main-header"
->
-    <Logo />
-    <nav id="main-nav">
-        <div class="links">
-            {
-                routes.map(({ name, path: href }) => {
-                    let currentPage = href == pathName;
-                    return (
-                        <a {href} aria-current={currentPage && "page"}>
-                            {name}
-                        </a>
-                    );
-                })
-            }
-        </div>
-    </nav>
-</header>
+<nav id="main-nav">
+  <div class="links">
+    {
+      paths.map(({ name, path }) => {
+        const worksSubDir = work && path == "/works/";
+        const genSubDir = gen && path == "/generative/";
+
+        const iconType: IconTypes = path == "/" ? "home" : worksSubDir || genSubDir ? "back" : name;
+
+        return (
+          <a
+            href={path}
+            aria-current={url.pathname == path ? "page" : null}
+            aria-label={((worksSubDir || genSubDir) && "back to works page") || `link to ${name}`}
+            title={name}
+          >
+            <Icon name={iconType} />
+          </a>
+        );
+      })
+    }
+  </div>
+</nav>
 
 <script>
-    const mainHeader = document.getElementById("main-header");
+  const mainHeader = document.getElementById("main-header");
 
-    let keyframes: Keyframe[] = [
-        { transform: "scale(1,0)", offset: 0 },
-        { transform: "scale(1,0.5)", offset: 0.25 },
-        { transform: "scale(1,1)", offset: 1 },
-    ];
-    let keyFramesOption: KeyframeAnimationOptions = {
-        duration: 3000,
-        easing: "ease",
-        delay: 0,
-        fill: "both",
-        pseudoElement: "::before",
-    };
+  let keyframes: Keyframe[] = [
+    { transform: "scale(1,0)", offset: 0 },
+    { transform: "scale(1,0.5)", offset: 0.25 },
+    { transform: "scale(1,1)", offset: 1 },
+  ];
+  let keyFramesOption: KeyframeAnimationOptions = {
+    duration: 3000,
+    easing: "ease",
+    delay: 0,
+    fill: "both",
+    pseudoElement: "::before",
+  };
 
-    let loadAnimation: Animation;
+  let loadAnimation: Animation;
 
-    if (mainHeader) {
-        document.addEventListener("astro:before-preparation", () => {
-            loadAnimation = mainHeader.animate(keyframes, keyFramesOption);
-        });
-        document.addEventListener("astro:after-swap", () => {
-            //@ts-ignore
-            let timeFraction = loadAnimation.currentTime / 3000;
-            loadAnimation.cancel();
-            if (!timeFraction) return;
-            loadAnimation = mainHeader.animate(
-                [{ transform: "scale(1,0)" }, { transform: "scale(1,1)" }],
-                {
-                    ...keyFramesOption,
-                    duration: 400,
-                    delay: 0,
-                }
-            );
-            loadAnimation.currentTime = timeFraction * 400;
-            loadAnimation.reverse();
-        });
-        document.addEventListener("astro:after-swap", () => {
-            const pathName = location.pathname;
+  if (mainHeader) {
+    document.addEventListener("astro:before-preparation", () => {
+      loadAnimation = mainHeader.animate(keyframes, keyFramesOption);
+    });
+    document.addEventListener("astro:after-swap", () => {
+      //@ts-ignore
+      let timeFraction = loadAnimation.currentTime / 3000;
+      loadAnimation.cancel();
+      if (!timeFraction) return;
+      loadAnimation = mainHeader.animate(
+        [{ transform: "scale(1,0)" }, { transform: "scale(1,1)" }],
+        {
+          ...keyFramesOption,
+          duration: 400,
+          delay: 0,
+        }
+      );
+      loadAnimation.currentTime = timeFraction * 400;
+      loadAnimation.reverse();
+    });
+    document.addEventListener("astro:after-swap", () => {
+      const pathName = location.pathname;
 
-            const previousAnchor = mainHeader.querySelector(
-                "a[aria-current='page']"
-            );
-            if (previousAnchor) {
-                previousAnchor.removeAttribute("aria-current");
-            }
+      const previousAnchor = mainHeader.querySelector("a[aria-current='page']");
+      if (previousAnchor) {
+        previousAnchor.removeAttribute("aria-current");
+      }
 
-            const currentAnchor = mainHeader.querySelector(
-                `a[href='${pathName}']`
-            );
-            if (currentAnchor) {
-                currentAnchor.ariaCurrent = "page";
-            }
-        });
-    }
+      const currentAnchor = mainHeader.querySelector(`a[href='${pathName}']`);
+      if (currentAnchor) {
+        currentAnchor.ariaCurrent = "page";
+      }
+    });
+  }
 </script>
 
 <style>
-    header {
-        padding-block: 8px;
-        padding-inline: 16px;
-        align-self: center;
+  nav {
+    display: flex;
+    overflow: visible;
+    z-index: 10;
+  }
 
-        display: flex;
-        align-items: center;
+  .links {
+    margin-inline-start: auto;
+    display: flex;
+    gap: 8px;
+  }
 
-        box-shadow: 0 0 8px 0px hsl(0 0% 0% / 0.05);
-        border: 1px hsl(0 0% 0% / 0.05) solid;
+  a[aria-current="page"] {
+    color: hsl(var(--color-offset));
+  }
 
-        position: relative;
-        contain: paint;
-    }
-    header::before {
-        content: "";
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        left: 0;
+  a {
+    display: block;
+    line-height: 0;
+    transition: color 75ms ease;
+  }
+  span {
+    font-weight: 200;
+    opacity: 0.5;
+  }
+  ul {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
 
-        transform-origin: center bottom;
-        transform: scale(1, 0);
-
-        /* background-color: rgb(235, 238, 65); */
-        background-color: hsl(var(--color-secondary));
-        z-index: 0;
-    }
-    header :global(> :first-child) {
-        margin-inline-end: 32px;
-    }
-
-    nav {
-        display: flex;
-        overflow: visible;
-        z-index: 10;
-    }
-
-    .links {
-        margin-inline-start: auto;
-        display: flex;
-        gap: 8px;
-    }
-
-    a[aria-current="page"] {
-        color: hsl(var(--color-offset));
-
-        position: relative;
-
-        &::after {
-            content: "▾";
-            position: absolute;
-            left: 50%;
-            top: -10px;
-            transform: translate(-50%, 0%);
-        }
-    }
+  [aria-current="page"],
+  [aria-label="back to works page"] {
+    color: hsl(var(--color-offset));
+  }
 </style>

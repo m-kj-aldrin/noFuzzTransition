@@ -1,17 +1,16 @@
 ---
+import Card from "@lib/components/Card.astro";
 import Grid from "@lib/components/Grid.astro";
 import OmptimizedPortfolioImages from "@lib/components/OmptimizedPortfolioImages.astro";
 import BaseLayout from "@lib/layouts/BaseLayout.astro";
 
-const images = await Astro.glob<{ default: ImageMetadata }>(
-    "@assets/draft/img/*"
-);
+const images = await Astro.glob<{ default: ImageMetadata }>("@assets/draft/img/*");
 ---
 
 <BaseLayout title="works">
-    <Grid>
-        <OmptimizedPortfolioImages {images} />
-    </Grid>
+  <Grid>
+    <OmptimizedPortfolioImages {images} component={Card} />
+  </Grid>
 </BaseLayout>
 
 <style></style>
